@@ -1,0 +1,28 @@
+---
+- name: running cloudboot container
+  docker_container:
+    name: cloudboot
+    image: cloudboot:v2
+    detach: True
+    interactive: True
+    tty: True
+    privileged: True
+    network_mode: host
+    volumes:
+      - "/cloudboot/dhcp/:/opt/cloudboot/etc/dhcp/"
+      - "/cloudboot/ubuntu14.04/:/opt/cloudboot/home/www/ubuntu/14.04/os/x86_64"
+      - "/cloudboot/centos7.2/:/opt/cloudboot/home/www/centos/7.2/os/x86_64"
+      - "/cloudboot/centos6.7/:/opt/cloudboot/home/www/centos/6.7/os/x86_64"
+      - "/cloudboot/dns/:/opt/cloudboot/etc/dnsmasq.d"
+      - "/cloudboot/ks:/opt/cloudboot/home/www/ks"
+
+- name: copy cloudboot.sql
+  copy: src=cloudboot.sql dest=/tmp/cloudboot.sql
+
+- name: copy cloudboot.sql to cloudboot_docker
+  shell: docker cp /tmp/cloudboot.sql cloudboot:/tmp
+
+- name: import cloudboot database
+  shell: docker exec cloudboot bash -c "chroot '/opt/cloudboot' /usr/bin/mysql -h127.0.0.1 cloudboot < /tmp/cloudboot.sql"
+  tags:
+    - docker_shell

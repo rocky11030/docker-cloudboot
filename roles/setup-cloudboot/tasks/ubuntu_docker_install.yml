@@ -1,0 +1,51 @@
+---
+- name: copy the ubuntu docker file
+  copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - {src: 'ubuntu/libltdl7_2.4.2-1.7ubuntu1_amd64.deb', dest: '/tmp/libltdl7_2.4.2-1.7ubuntu1_amd64.deb'}
+    - {src: 'ubuntu/libsystemd-journal0_204-5ubuntu20.25_amd64.deb', dest: '/tmp/libsystemd-journal0_204-5ubuntu20.25_amd64.deb'}
+    - {src: 'ubuntu/aufs-tools_1%3a3.2+20130722-1.1_amd64.deb', dest: '/tmp/aufs-tools_1%3a3.2+20130722-1.1_amd64.deb'}
+    - {src: 'ubuntu/cgroup-lite_1.9_all.deb', dest: '/tmp/cgroup-lite_1.9_all.deb'}
+    - {src: 'ubuntu/docker-engine_17.05.0~ce-0~ubuntu-trusty_amd64.deb', dest: '/tmp/docker-engine_17.05.0~ce-0~ubuntu-trusty_amd64.deb'}
+    - {src: 'ubuntu/liberror-perl_0.17-1.1_all.deb', dest: '/tmp/liberror-perl_0.17-1.1_all.deb'}
+    - {src: 'ubuntu/git-man_1%3a1.9.1-1ubuntu0.7_all.deb', dest: '/tmp/git-man_1%3a1.9.1-1ubuntu0.7_all.deb'}
+    - {src: 'ubuntu/git_1%3a1.9.1-1ubuntu0.7_amd64.deb', dest: '/tmp/git_1%3a1.9.1-1ubuntu0.7_amd64.deb'}
+
+- name: install docker 17.05.0-ce
+  shell:  dpkg -i /tmp/libltdl7_2.4.2-1.7ubuntu1_amd64.deb && \
+          dpkg -i /tmp/libsystemd-journal0_204-5ubuntu20.25_amd64.deb && \
+          dpkg -i /tmp/aufs-tools_1%3a3.2+20130722-1.1_amd64.deb && \
+          dpkg -i /tmp/cgroup-lite_1.9_all.deb && \
+          dpkg -i /tmp/docker-engine_17.05.0~ce-0~ubuntu-trusty_amd64.deb && \
+          dpkg -i /tmp/liberror-perl_0.17-1.1_all.deb && \
+          dpkg -i /tmp/git-man_1%3a1.9.1-1ubuntu0.7_all.deb && \
+          dpkg -i /tmp/git_1%3a1.9.1-1ubuntu0.7_amd64.deb
+          
+  tags:
+    - installs
+
+- name: remove docker packages
+  shell: rm -rf /tmp/*.deb
+
+- name: start docker service
+  service: name=docker state=started
+  tags:
+    - starts
+
+- name: copy ali source
+  copy: src=ali.list dest=/etc/apt/sources.list
+
+- name: update source
+  shell: apt-get update
+
+- name: install python-pip
+  apt: name=python-pip state=present
+
+- name: pip install docker-py
+  pip: name=docker-py state=present
+
+#- name: registry images department
+#  shell: echo 'DOCKER_OPTS="--insecure-registry 10.10.20.96"' >> /etc/default/docker
+
+#- name: restart docker service
+#  service: name=docker state=restarted

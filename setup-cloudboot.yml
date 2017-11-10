@@ -1,0 +1,5 @@
+---
+- hosts: cloudboot
+  user: root
+  roles:
+    - setup-cloudboot

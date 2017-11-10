@@ -1,0 +1,30 @@
+---
+- name: mkdir cloudboot directory
+  file: path={{ item }} recurse=yes state=directory
+  with_items:
+    - /cloudboot/ubuntu14.04
+    - /cloudboot/centos7.2
+    - /cloudboot/centos6.7
+    - /cloudboot/dhcp
+    - /cloudboot/dns
+    - /cloudboot/ks
+
+- name: tar ubuntu14.04 and centos7.2 packages
+  unarchive:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "centos7.2.tar.gz", dest: "/cloudboot/centos7.2/" }
+    - { src: "ubuntu14.04.5.tar.gz", dest: "/cloudboot/ubuntu14.04/" }
+    - { src: "centos6.7.tar.gz", dest: "/cloudboot/centos6.7/" }
+
+- name: copy dhcp hosts.conf ok.sh
+  template:
+    src: "{{ item.src}}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "dhcpd.conf", dest: "/cloudboot/dhcp/dhcpd.conf" }
+    - { src: "hosts.conf", dest: "/cloudboot/dns/hosts.conf" }
+    - { src: "ok.sh", dest: "/cloudboot/ks/ok.sh" }
+
+

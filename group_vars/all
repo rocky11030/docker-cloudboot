@@ -1,0 +1,9 @@
+---
+#dhcp dns ok
+server: 10.2.8.230
+subnet: 10.2.0.0
+netmask: 255.255.0.0
+range_start: 10.2.32.100
+range_end: 10.2.32.200
+gateway: 10.2.254.254
+

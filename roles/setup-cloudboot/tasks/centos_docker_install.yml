@@ -1,0 +1,38 @@
+---
+- name: copy selinux config
+  copy: src=selinux dest=/etc/sysconfig/selinux
+
+- name: set selinux disabled
+  shell: setenforce 0
+  ignore_errors: True
+
+- name: copy ali centos7 sources
+  copy: src=epel-release-latest-7.noarch.rpm dest=/tmp/epel-release-latest-7.noarch.rpm
+
+- name: exec centos7 sources
+  shell: rpm -ivh /tmp/epel-release-latest-7.noarch.rpm
+  ignore_errors: True
+
+- name: copy the centos docker file
+  copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - {src: 'centos/docker-engine-selinux-17.05.0.ce-1.el7.centos.noarch.rpm', dest: '/tmp/docker-engine-selinux-17.05.0.ce-1.el7.centos.noarch.rpm'}
+    - {src: 'centos/docker-engine-17.05.0.ce-1.el7.centos.x86_64.rpm', dest: '/tmp/docker-engine-17.05.0.ce-1.el7.centos.x86_64.rpm'}
+
+- name: install docker 17.05
+  shell: cd /tmp && yum install -y /tmp/docker-engine-selinux-17.05.0.ce-1.el7.centos.noarch.rpm && yum install -y /tmp/docker-engine-17.05.0.ce-1.el7.centos.x86_64.rpm
+  ignore_errors: True  
+  tags:
+    - installs
+
+- name: start docker service
+  service: name=docker state=started
+  tags:
+    - starts
+
+- name: install python-pip
+  yum: name=python-pip state=present
+
+- name: install docker-py
+  pip:
+    name: docker-py
